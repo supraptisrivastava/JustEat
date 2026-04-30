@@ -25,4 +25,6 @@ public class Cart extends BaseEntity{
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL , orphanRemoval = true)
     private List<CartItem> items = new ArrayList<>();
+
+    private Double totalAmount = 0.0;
 }

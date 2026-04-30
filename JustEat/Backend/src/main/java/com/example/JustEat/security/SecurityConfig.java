@@ -53,7 +53,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         )
                         .permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/restaurants", "/restaurants/**").permitAll()
+                        .requestMatchers("/cart/**")
+                        .hasRole("CUSTOMER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
