@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { getRestaurant } from "../api/restaurantApi";
 import { getMenu } from "../api/menuApi";
+import { addToCart } from "../api/cartApi";
+import { useAuth } from "../context/AuthContext";
 
 const dietCls = (d) => {
   const base = "text-xs font-bold px-2.5 py-0.5 rounded-full border";
@@ -23,10 +25,13 @@ const tagCls =
 const RestaurantDetail = () => {
   const { publicId } = useParams();
   const navigate = useNavigate();
+  const { role } = useAuth();
   const [restaurant, setRestaurant] = useState(null);
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [addingItemId, setAddingItemId] = useState(null);
+  const [cartMessage, setCartMessage] = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -38,6 +43,21 @@ const RestaurantDetail = () => {
       .catch(() => setError("Failed to load restaurant details."))
       .finally(() => setLoading(false));
   }, [publicId]);
+
+  const handleAddToCart = async (menuItemId) => {
+    setAddingItemId(menuItemId);
+    setCartMessage("");
+    try {
+      await addToCart(menuItemId, 1);
+      setCartMessage("Added to cart!");
+      setTimeout(() => setCartMessage(""), 2000);
+    } catch (err) {
+      setCartMessage(err.response?.data?.message || "Failed to add to cart");
+      setTimeout(() => setCartMessage(""), 3000);
+    } finally {
+      setAddingItemId(null);
+    }
+  };
 
   return (
     <>
@@ -113,8 +133,21 @@ const RestaurantDetail = () => {
               )}
             </div>
 
-            <div className="text-xl font-bold mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">
-              Menu
+            <div className="flex justify-between items-center mb-4 pb-2 border-b-2 border-gray-200 dark:border-gray-700">
+              <div className="text-xl font-bold text-gray-900 dark:text-white">
+                Menu
+              </div>
+              {cartMessage && (
+                <div
+                  className={`text-sm font-semibold px-3 py-1 rounded-lg ${
+                    cartMessage.includes("Added")
+                      ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                      : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                  }`}
+                >
+                  {cartMessage}
+                </div>
+              )}
             </div>
 
             {menu.length === 0 ? (
@@ -144,7 +177,7 @@ const RestaurantDetail = () => {
                     <div className="text-lg font-extrabold text-orange-500">
                       ₹{item.price?.toFixed(2)}
                     </div>
-                    <div className="flex justify-between items-center flex-wrap gap-2 mt-auto">
+                    <div className="flex justify-between items-center flex-wrap gap-2">
                       <span className={dietCls(item.dietaryRestriction)}>
                         {item.dietaryRestriction?.replace("_", " ") ||
                           item.cuisineType}
@@ -155,6 +188,16 @@ const RestaurantDetail = () => {
                         </span>
                       )}
                     </div>
+                    {/* Add to Cart Button - Only for Customers */}
+                    {role === "CUSTOMER" && item.available && (
+                      <button
+                        onClick={() => handleAddToCart(item.id)}
+                        disabled={addingItemId === item.id}
+                        className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed border-none cursor-pointer"
+                      >
+                        {addingItemId === item.id ? "Adding..." : "Add to Cart"}
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

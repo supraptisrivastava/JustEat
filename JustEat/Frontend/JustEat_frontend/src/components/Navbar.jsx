@@ -28,6 +28,22 @@ const Navbar = () => {
             </button>
           </Link>
         )}
+        {role === "CUSTOMER" && (
+          <>
+            <Link
+              to="/cart"
+              className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 font-semibold text-sm transition-colors no-underline"
+            >
+              🛒 Cart
+            </Link>
+            <Link
+              to="/orders"
+              className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 font-semibold text-sm transition-colors no-underline"
+            >
+              📦 Orders
+            </Link>
+          </>
+        )}
         <button
           onClick={toggle}
           title={dark ? "Switch to light mode" : "Switch to dark mode"}

@@ -1,6 +1,8 @@
 package com.example.JustEat.service.Impl;
-
+import java.util.List;
+import com.example.JustEat.dto.response.OrderResponse;
 import com.example.JustEat.entity.Cart;
+import com.example.JustEat.entity.CartItem;
 import com.example.JustEat.entity.Order;
 import com.example.JustEat.entity.OrderItem;
 import com.example.JustEat.entity.User;
@@ -15,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.example.JustEat.mapper.OrderMapper;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -53,6 +55,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setUser(user);
         order.setRestaurant(cart.getRestaurant());
+
         order.setStatus(OrderStatus.PENDING);
 //        order.setOrderTime(LocalDateTime.now());
         order.setTotalAmount(cart.getTotalAmount());
@@ -76,5 +79,60 @@ public class OrderServiceImpl implements OrderService {
         cartService.clearCart();
 
         return savedOrder;
+    }
+    @Override
+    public List<OrderResponse> getOrderHistory() {
+
+        User user = getCurrentUser();
+
+        return orderRepository.findByUserOrderByCreatedAtDesc(user)
+                .stream()
+                .map(OrderMapper::toResponse)
+                .toList();
+    }
+    @Override
+    public void reorder(UUID publicId) {
+
+        User user = getCurrentUser();
+
+        // 🔍 get order
+        Order order = orderRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // 🛒 get or create cart
+        Cart cart = cartRepository.findByUser(user)
+                .orElse(null);
+
+        if (cart == null) {
+            cart = new Cart();
+            cart.setUser(user);
+        }
+
+        // 🔥 enforce single restaurant rule
+        cart.setRestaurant(order.getRestaurant());
+
+        // 🧹 clear old cart
+        cart.getItems().clear();
+
+        // 🔁 copy items
+        for (OrderItem orderItem : order.getItems()) {
+
+            CartItem cartItem = new CartItem();
+            cartItem.setCart(cart);
+            cartItem.setMenuItem(orderItem.getMenuItem());
+            cartItem.setQuantity(orderItem.getQuantity());
+            cartItem.setPrice(orderItem.getPrice());
+
+            cart.getItems().add(cartItem);
+        }
+
+        // 💰 recalculate total
+        double total = cart.getItems().stream()
+                .mapToDouble(i -> i.getPrice() * i.getQuantity())
+                .sum();
+
+        cart.setTotalAmount(total);
+
+        cartRepository.save(cart);
     }
 }

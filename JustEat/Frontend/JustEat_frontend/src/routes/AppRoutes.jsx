@@ -6,6 +6,9 @@ import RestaurantDetail from "../pages/RestaurantDetail";
 import CreateRestaurant from "../pages/CreateRestaurant";
 import OwnerDashboard from "../pages/OwnerDashboard";
 import ManageRestaurant from "../pages/ManageRestaurant";
+import CartPage from "../pages/CartPage";
+import OrderHistoryPage from "../pages/OrderHistoryPage";
+import OrderDetailsPage from "../pages/OrderDetailsPage";
 import PrivateRoute from "../components/PrivateRoute";
 import { useAuth } from "../context/AuthContext";
 
@@ -60,6 +63,30 @@ const AppRoutes = () => (
         element={
           <PrivateRoute>
             <ManageRestaurant />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/cart"
+        element={
+          <PrivateRoute>
+            <CartPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/orders"
+        element={
+          <PrivateRoute>
+            <OrderHistoryPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/orders/:publicId"
+        element={
+          <PrivateRoute>
+            <OrderDetailsPage />
           </PrivateRoute>
         }
       />
