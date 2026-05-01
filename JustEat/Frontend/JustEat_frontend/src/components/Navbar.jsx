@@ -22,11 +22,19 @@ const Navbar = () => {
       </Link>
       <div className="flex items-center gap-4">
         {role === "OWNER" && (
-          <Link to="/create-restaurant">
-            <button className="border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white font-semibold text-sm px-4 py-2 rounded-lg transition-all cursor-pointer bg-transparent">
-              + Add Restaurant
-            </button>
-          </Link>
+          <>
+            <Link
+              to="/owner/orders"
+              className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 font-semibold text-sm transition-colors no-underline"
+            >
+              📋 Orders
+            </Link>
+            <Link to="/create-restaurant">
+              <button className="border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white font-semibold text-sm px-4 py-2 rounded-lg transition-all cursor-pointer bg-transparent">
+                + Add Restaurant
+              </button>
+            </Link>
+          </>
         )}
         {role === "CUSTOMER" && (
           <>

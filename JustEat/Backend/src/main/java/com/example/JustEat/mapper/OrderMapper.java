@@ -15,7 +15,9 @@ public class OrderMapper {
                 .restaurantName(order.getRestaurant().getName())
                 .totalAmount(order.getTotalAmount())
                 .status(order.getStatus())
-
+                .createdAt(order.getCreatedAt())
+                .customerName(order.getUser().getFirstName() + " " + order.getUser().getLastName())
+                .customerEmail(order.getUser().getEmail())
                 .items(
                         order.getItems().stream()
                                 .map(item -> OrderItemResponse.builder()

@@ -18,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.JustEat.mapper.OrderMapper;
-import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public Order placeOrder() {
+    public OrderResponse placeOrder() {
         User user = getCurrentUser();
 
         // Get user's cart
@@ -57,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
         order.setRestaurant(cart.getRestaurant());
 
         order.setStatus(OrderStatus.PENDING);
-//        order.setOrderTime(LocalDateTime.now());
+
         order.setTotalAmount(cart.getTotalAmount());
 
         // Convert cart items to order items
@@ -78,7 +77,7 @@ public class OrderServiceImpl implements OrderService {
         // Clear cart
         cartService.clearCart();
 
-        return savedOrder;
+        return OrderMapper.toResponse(savedOrder);
     }
     @Override
     public List<OrderResponse> getOrderHistory() {
@@ -134,5 +133,44 @@ public class OrderServiceImpl implements OrderService {
         cart.setTotalAmount(total);
 
         cartRepository.save(cart);
+    }
+    @Override
+    public OrderResponse getOrder(UUID publicId) {
+
+        Order order = orderRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        return OrderMapper.toResponse(order);
+    }
+
+    @Override
+    public List<OrderResponse> getOwnerOrders() {
+        User owner = getCurrentUser();
+
+        // Find all restaurants owned by this user
+        // Then find all orders for those restaurants
+        List<Order> orders = orderRepository.findByRestaurant_OwnerId(owner.getId());
+
+        return orders.stream()
+                .map(OrderMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public void updateStatus(UUID publicId, OrderStatus status) {
+
+        User owner = getCurrentUser();
+
+        Order order = orderRepository.findByPublicId(publicId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        // 🔐 SECURITY CHECK - verify the order's restaurant belongs to this owner
+        if (!order.getRestaurant().getOwner().getId().equals(owner.getId())) {
+            throw new RuntimeException("Not allowed to update this order");
+        }
+
+        order.setStatus(status);
+
+        orderRepository.save(order);
     }
 }

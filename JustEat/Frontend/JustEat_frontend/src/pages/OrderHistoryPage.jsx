@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { getOrderHistory, reorder } from "../api/orderApi";
@@ -9,6 +9,8 @@ const statusCls = (status) => {
     PENDING: `${base} bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400`,
     CONFIRMED: `${base} bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400`,
     PREPARING: `${base} bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400`,
+    READY: `${base} bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400`,
+    COMPLETED: `${base} bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400`,
     OUT_FOR_DELIVERY: `${base} bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400`,
     DELIVERED: `${base} bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400`,
     CANCELLED: `${base} bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400`,
@@ -23,24 +25,37 @@ const OrderHistoryPage = () => {
   const [error, setError] = useState("");
   const [reorderingId, setReorderingId] = useState(null);
   const [successMsg, setSuccessMsg] = useState("");
+  const intervalRef = useRef(null);
 
+  const fetchOrders = async (showLoading = false) => {
+    if (showLoading) setLoading(true);
+    try {
+      const res = await getOrderHistory();
+      setOrders(res.data || []);
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setOrders([]);
+      } else if (showLoading) {
+        setError("Failed to load order history.");
+      }
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  };
+
+  // Initial fetch + polling every 5 seconds for live status
   useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true);
-      try {
-        const res = await getOrderHistory();
-        setOrders(res.data || []);
-      } catch (err) {
-        if (err.response?.status === 404) {
-          setOrders([]);
-        } else {
-          setError("Failed to load order history.");
-        }
-      } finally {
-        setLoading(false);
+    fetchOrders(true);
+
+    intervalRef.current = setInterval(() => {
+      fetchOrders(false);
+    }, 5000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
       }
     };
-    fetchOrders();
   }, []);
 
   const handleReorder = async (e, publicId) => {
@@ -70,9 +85,15 @@ const OrderHistoryPage = () => {
           ← Back to Home
         </button>
 
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          Order History
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Order History
+          </h1>
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            Live status
+          </div>
+        </div>
 
         {successMsg && (
           <div className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 rounded-lg px-4 py-3 text-sm mb-4">

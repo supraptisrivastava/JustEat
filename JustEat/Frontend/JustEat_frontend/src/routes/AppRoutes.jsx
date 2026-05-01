@@ -9,6 +9,7 @@ import ManageRestaurant from "../pages/ManageRestaurant";
 import CartPage from "../pages/CartPage";
 import OrderHistoryPage from "../pages/OrderHistoryPage";
 import OrderDetailsPage from "../pages/OrderDetailsPage";
+import OwnerOrdersPage from "../pages/OwnerOrdersPage";
 import PrivateRoute from "../components/PrivateRoute";
 import { useAuth } from "../context/AuthContext";
 
@@ -63,6 +64,14 @@ const AppRoutes = () => (
         element={
           <PrivateRoute>
             <ManageRestaurant />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/owner/orders"
+        element={
+          <PrivateRoute>
+            <OwnerOrdersPage />
           </PrivateRoute>
         }
       />

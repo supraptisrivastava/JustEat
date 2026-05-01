@@ -55,6 +55,12 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/cart/**")
                         .hasRole("CUSTOMER")
+                        // Order endpoints - customer only
+                        .requestMatchers("/order/place", "/order/history", "/order/reorder/**")
+                        .hasRole("CUSTOMER")
+                        // Order endpoints - owner only
+                        .requestMatchers("/order/owner", "/order/*/status")
+                        .hasRole("OWNER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

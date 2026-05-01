@@ -14,4 +14,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUserOrderByCreatedAtDesc(User user);
 
     Optional<Order> findByPublicId(UUID publicId);
+    
+    List<Order> findByRestaurant_Id(Long restaurantId);
+    
+    // Find all orders for restaurants owned by a specific owner
+    List<Order> findByRestaurant_OwnerId(Long ownerId);
+    
+    // Find orders by restaurant owner, sorted by newest first
+    List<Order> findByRestaurant_OwnerIdOrderByCreatedAtDesc(Long ownerId);
 }
