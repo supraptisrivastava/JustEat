@@ -8,6 +8,7 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -48,6 +49,9 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @NotNull
     private Location location;
+
+    private String resetToken;
+    private LocalDateTime resetTokenExpiry;
 
     @PrePersist
     public void generatePublicId() {

@@ -1,11 +1,15 @@
 package com.example.JustEat.dto.request;
 
+import com.example.JustEat.enums.CuisineType;
+import com.example.JustEat.enums.DietaryRestriction;
 import com.example.JustEat.enums.Gender;
 import com.example.JustEat.enums.Location;
 import com.example.JustEat.enums.Role;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -39,4 +43,8 @@ public class RegisterRequest {
 
     @NotNull
     private Role role;
+
+    // Preferences (optional, mainly for CUSTOMER)
+    private List<CuisineType> favouriteCuisines;
+    private List<DietaryRestriction> dietaryRestrictions;
 }

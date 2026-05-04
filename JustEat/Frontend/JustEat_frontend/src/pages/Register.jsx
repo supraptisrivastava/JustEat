@@ -4,11 +4,35 @@ import { register as registerService } from "../auth/authService";
 
 const LOCATIONS = ["NOIDA", "DELHI", "GURGAON"];
 const GENDERS = ["MALE", "FEMALE", "OTHER"];
+const CUISINE_TYPES = [
+  "INDIAN",
+  "CHINESE",
+  "JAPANESE",
+  "ITALIAN",
+  "MEXICAN",
+  "CONTINENTAL",
+  "FRENCH",
+  "FAST_FOOD",
+];
+const DIETARY_RESTRICTIONS = [
+  "VEG",
+  "NON_VEG",
+  "EGG",
+  "VEGAN",
+  "JAIN",
+  "GLUTEN_FREE",
+];
 
 const inputCls =
   "w-full px-3 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-orange-500 transition-colors";
 const labelCls =
   "text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider";
+const chipCls = (selected) =>
+  `px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer transition-all border-2 ${
+    selected
+      ? "bg-orange-500 text-white border-orange-500"
+      : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-orange-300"
+  }`;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -21,12 +45,32 @@ const Register = () => {
     gender: "",
     location: "",
     role: "CUSTOMER",
+    favouriteCuisines: [],
+    dietaryRestrictions: [],
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
+
+  const toggleCuisine = (cuisine) => {
+    setForm((prev) => ({
+      ...prev,
+      favouriteCuisines: prev.favouriteCuisines.includes(cuisine)
+        ? prev.favouriteCuisines.filter((c) => c !== cuisine)
+        : [...prev.favouriteCuisines, cuisine],
+    }));
+  };
+
+  const toggleDietary = (dietary) => {
+    setForm((prev) => ({
+      ...prev,
+      dietaryRestrictions: prev.dietaryRestrictions.includes(dietary)
+        ? prev.dietaryRestrictions.filter((d) => d !== dietary)
+        : [...prev.dietaryRestrictions, dietary],
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,7 +92,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-white dark:from-gray-900 dark:to-gray-800 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-10 w-full max-w-lg">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-10 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="text-3xl font-extrabold text-orange-500 mb-1">
           Just<span className="text-gray-900 dark:text-white">Eat</span>
         </div>
@@ -203,6 +247,55 @@ const Register = () => {
                 </select>
               </div>
             </div>
+
+            {/* Customer Preferences - Only show for CUSTOMER role */}
+            {form.role === "CUSTOMER" && (
+              <>
+                {/* Dietary Restrictions */}
+                <div className="flex flex-col gap-2">
+                  <label className={labelCls}>
+                    Dietary Preferences{" "}
+                    <span className="text-gray-400">(optional)</span>
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {DIETARY_RESTRICTIONS.map((diet) => (
+                      <button
+                        key={diet}
+                        type="button"
+                        onClick={() => toggleDietary(diet)}
+                        className={chipCls(
+                          form.dietaryRestrictions.includes(diet),
+                        )}
+                      >
+                        {diet.replace("_", " ")}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Favourite Cuisines */}
+                <div className="flex flex-col gap-2">
+                  <label className={labelCls}>
+                    Favourite Cuisines{" "}
+                    <span className="text-gray-400">(optional)</span>
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {CUISINE_TYPES.map((cuisine) => (
+                      <button
+                        key={cuisine}
+                        type="button"
+                        onClick={() => toggleCuisine(cuisine)}
+                        className={chipCls(
+                          form.favouriteCuisines.includes(cuisine),
+                        )}
+                      >
+                        {cuisine.replace("_", " ")}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="mt-6 flex flex-col gap-3">

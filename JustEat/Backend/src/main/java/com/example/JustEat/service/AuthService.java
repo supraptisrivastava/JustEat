@@ -7,4 +7,6 @@ import com.example.JustEat.dto.request.RegisterRequest;
 public interface AuthService {
     void register(RegisterRequest request);
     AuthResponse login(LoginRequest request);
+    void forgotPassword(String email);
+    void resetPassword(String token, String newPassword);
 }
