@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: justeat-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: justeat
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d justeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - justeat-network
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./JustEat/Backend
+      dockerfile: Dockerfile
+    container_name: justeat-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/justeat
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      # Server
+      SERVER_PORT: 8090
+      # Cloudinary (override in .env file for security)
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-droy74tj6}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-746653789958985}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-CcjewmLE5pnm8bWRAzsBvl1o6kU}
+      # Mail configuration
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-justeat306@gmail.com}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-sjgz dozp kyji yoql}
+    ports:
+      - "8090:8090"
+    networks:
+      - justeat-network
+
+  # React Frontend with Nginx
+  frontend:
+    build:
+      context: ./JustEat/Frontend/JustEat_frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8090
+    container_name: justeat-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - justeat-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  justeat-network:
+    driver: bridge
+
