@@ -1,5 +1,5 @@
 package com.example.JustEat.service.Impl;
-
+import com.example.JustEat.enums.CuisineType;
 import com.example.JustEat.dto.request.CreateRestaurantRequest;
 import com.example.JustEat.dto.response.RestaurantResponse;
 import com.example.JustEat.entity.Restaurant;
@@ -11,12 +11,16 @@ import com.example.JustEat.mapper.RestaurantMapper;
 import com.example.JustEat.repository.RestaurantRepository;
 import com.example.JustEat.repository.UserRepository;
 import com.example.JustEat.service.CloudinaryService;
+import com.example.JustEat.repository.UserPreferenceRepository;
+import com.example.JustEat.repository.OrderRepository;
 import com.example.JustEat.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import java.util.ArrayList;
+import com.example.JustEat.entity.Order;
+import com.example.JustEat.entity.UserPreference;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,6 +30,19 @@ public class RestaurantServiceImpl implements RestaurantService {
     private final UserRepository userRepository;
     private final RestaurantRepository restaurantRepository;
     private final CloudinaryService cloudinaryService;
+    private final UserPreferenceRepository userPreferenceRepository;
+    private final OrderRepository orderRepository;
+    private User getCurrentUser() {
+        String userIdStr = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        UUID userId = UUID.fromString(userIdStr);
+
+        return userRepository.findByPublicId(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+    }
     @Override
     public RestaurantResponse createRestaurant(CreateRestaurantRequest request, MultipartFile image) {
         //get current user from jwt
@@ -91,4 +108,47 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .map(RestaurantMapper::toResponse)
                 .toList();
     }
-}
+    @Override
+    public List<RestaurantResponse> getRecommendations() {
+        User user = getCurrentUser();
+        UserPreference preference = userPreferenceRepository.findByUser(user)
+                .orElse(null);
+
+        List<Restaurant> recommended = new ArrayList<>();
+        if (preference != null && preference.getFavouriteCuisines() != null) {
+            recommended.addAll(
+                    restaurantRepository.findByCuisineTypesIn(preference.getFavouriteCuisines())
+            );
+        }
+        List<Order> orders = orderRepository.findByUserOrderByCreatedAtDesc(user);
+
+        for (Order order : orders) {
+            recommended.add(order.getRestaurant());
+        }
+        List<Restaurant> unique = recommended.stream().distinct().toList();
+        return unique.stream()
+                .limit(10)
+                .map(RestaurantMapper::toResponse)
+                .toList();
+    }
+    @Override
+    public List<RestaurantResponse> searchRestaurants(String keyword, String cuisine, Location location) {
+
+        CuisineType cuisineEnum = null;
+
+        if (cuisine != null && !cuisine.isEmpty()) {
+            try {
+                cuisineEnum = CuisineType.valueOf(cuisine.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid cuisine type");
+            }
+        }
+
+        List<Restaurant> restaurants = restaurantRepository
+                .searchRestaurants(keyword, cuisineEnum, location);
+
+        return restaurants.stream()
+                .map(RestaurantMapper::toResponse)
+                .toList();
+    };
+};

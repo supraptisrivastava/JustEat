@@ -14,4 +14,6 @@ public interface RestaurantService {
     List<RestaurantResponse> getAllRestaurants(Location location);
     RestaurantResponse getRestaurant(UUID publicId);
     List<RestaurantResponse> getMyRestaurants();
+    List<RestaurantResponse> searchRestaurants(String keyword, String cuisine, Location location);
+    List<RestaurantResponse> getRecommendations();
 }

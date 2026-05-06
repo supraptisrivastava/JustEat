@@ -1,5 +1,5 @@
 package com.example.JustEat.controller;
-
+import org.springframework.http.ResponseEntity;
 import com.example.JustEat.dto.request.CreateRestaurantRequest;
 import com.example.JustEat.dto.response.RestaurantResponse;
 import com.example.JustEat.entity.Restaurant;
@@ -53,10 +53,24 @@ public class RestaurantController {
     public RestaurantResponse getRestaurants(@PathVariable UUID publicId){
         return restaurantService.getRestaurant(publicId);
     }
-
+    @GetMapping("/recommendations")
+    public ResponseEntity<List<RestaurantResponse>> getRecommendations() {
+        return ResponseEntity.ok(restaurantService.getRecommendations());
+    }
+    @GetMapping("/search")
+    public ResponseEntity<List<RestaurantResponse>> search(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String cuisine,
+            @RequestParam(required = false) Location location
+    ) {
+        return ResponseEntity.ok(
+                restaurantService.searchRestaurants(keyword, cuisine, location)
+        );
+    }
     @GetMapping("/my")
     @PreAuthorize("hasRole('OWNER')")
     public List<RestaurantResponse> getMyRestaurants(){
         return restaurantService.getMyRestaurants();
     }
 }
+

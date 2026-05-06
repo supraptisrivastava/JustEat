@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { getRestaurants } from "../api/restaurantApi";
+import SearchBar from "../components/SearchBar";
+import { getRestaurants, searchRestaurants } from "../api/restaurantApi";
 import { useAuth } from "../context/AuthContext";
 
 const LOCATIONS = ["ALL", "NOIDA", "DELHI", "GURGAON"];
@@ -26,15 +27,55 @@ const Home = () => {
   const [location, setLocation] = useState(userLocation || "ALL");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState("");
 
+  // Fetch default restaurants
   useEffect(() => {
+    if (!isSearching) {
+      setLoading(true);
+      setError("");
+      getRestaurants(location === "ALL" ? null : location)
+        .then((res) => setRestaurants(res.data))
+        .catch(() => setError("Failed to load restaurants."))
+        .finally(() => setLoading(false));
+    }
+  }, [location, isSearching]);
+
+  // Search handler
+  const handleSearch = useCallback((searchParams) => {
+    if (!searchParams) {
+      setIsSearching(false);
+      setSearchKeyword("");
+      return;
+    }
+
+    setIsSearching(true);
     setLoading(true);
     setError("");
-    getRestaurants(location === "ALL" ? null : location)
+    setSearchKeyword(searchParams.keyword || "");
+
+    searchRestaurants(searchParams)
       .then((res) => setRestaurants(res.data))
-      .catch(() => setError("Failed to load restaurants."))
+      .catch(() => setError("Failed to search restaurants."))
       .finally(() => setLoading(false));
-  }, [location]);
+  }, []);
+
+  // Highlight matched keyword in text
+  const highlightText = (text, keyword) => {
+    if (!keyword || !text) return text;
+    const regex = new RegExp(`(${keyword})`, "gi");
+    const parts = text.split(regex);
+    return parts.map((part, i) =>
+      regex.test(part) ? (
+        <mark key={i} className="bg-yellow-200 dark:bg-yellow-600 px-0.5 rounded">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
+    );
+  };
 
   return (
     <>
@@ -44,21 +85,35 @@ const Home = () => {
           Restaurants near you
         </h1>
 
-        <div className="flex gap-3 flex-wrap mb-8">
-          {LOCATIONS.map((loc) => (
-            <button
-              key={loc}
-              onClick={() => setLocation(loc)}
-              className={`border-2 font-semibold text-sm px-4 py-1.5 rounded-full cursor-pointer transition-all ${
-                location === loc
-                  ? "bg-orange-500 border-orange-500 text-white"
-                  : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-orange-500 hover:text-orange-500"
-              }`}
-            >
-              {loc}
-            </button>
-          ))}
-        </div>
+        {/* Search Bar */}
+        <SearchBar onSearch={handleSearch} initialLocation={userLocation || ""} />
+
+        {/* Location Filter - only show when not searching */}
+        {!isSearching && (
+          <div className="flex gap-3 flex-wrap mb-8">
+            {LOCATIONS.map((loc) => (
+              <button
+                key={loc}
+                onClick={() => setLocation(loc)}
+                className={`border-2 font-semibold text-sm px-4 py-1.5 rounded-full cursor-pointer transition-all ${
+                  location === loc
+                    ? "bg-orange-500 border-orange-500 text-white"
+                    : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-orange-500 hover:text-orange-500"
+                }`}
+              >
+                {loc}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Search Results Info */}
+        {isSearching && !loading && (
+          <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+            Found {restaurants.length} restaurant{restaurants.length !== 1 ? "s" : ""}
+            {searchKeyword && <span> matching "<strong>{searchKeyword}</strong>"</span>}
+          </div>
+        )}
 
         {loading && (
           <div className="flex justify-center items-center py-16">
@@ -110,7 +165,9 @@ const Home = () => {
                   </div>
                 )}
                 <div className="p-4">
-                  <div className="font-bold text-base mb-1">{r.name}</div>
+                  <div className="font-bold text-base mb-1">
+                    {highlightText(r.name, searchKeyword)}
+                  </div>
                   <div className="text-gray-500 dark:text-gray-400 text-sm mb-3 truncate">
                     {r.description}
                   </div>

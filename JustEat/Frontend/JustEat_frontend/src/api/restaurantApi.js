@@ -13,3 +13,12 @@ export const createRestaurant = (formData) =>
   });
 
 export const getMyRestaurants = () => api.get("/restaurants/my");
+
+export const searchRestaurants = ({ keyword, cuisine, location }) => {
+  const params = {};
+  if (keyword) params.keyword = keyword;
+  if (cuisine) params.cuisine = cuisine;
+  if (location) params.location = location;
+  return api.get("/restaurants/search", { params });
+};
+

@@ -27,7 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private  final JwtUtil jwtUtil;
     private final EmailService emailService;
-    String link = "http://localhost:5173/reset-password?token=" + token;
+
     @Transactional
     public void register(RegisterRequest req){
         if(userRepository.existsByEmail(req.getEmail())){

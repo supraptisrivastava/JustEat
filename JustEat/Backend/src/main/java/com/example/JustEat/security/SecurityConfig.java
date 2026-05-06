@@ -53,6 +53,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         )
                         .permitAll()
+                        .requestMatchers("/restaurants/recommendations")
+                        .hasAnyRole("CUSTOMER", "OWNER")
                         .requestMatchers("/cart/**")
                         .hasRole("CUSTOMER")
                         // Order endpoints - customer only
@@ -62,6 +64,7 @@ public class SecurityConfig {
                         .requestMatchers("/order/owner", "/order/*/status")
                         .hasRole("OWNER")
                         .anyRequest().authenticated()
+
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
