@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import CartItemCard from "../components/CartItemCard";
 import { getCart, removeCartItem, clearCart } from "../api/cartApi";
 import { placeOrder } from "../api/orderApi";
+import { showSuccess, showError, toastMessages } from "../utils/toast";
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const CartPage = () => {
         setCart({ items: [], totalAmount: 0 });
       } else {
         setError("Failed to load cart.");
+        showError("Failed to load cart.");
       }
     } finally {
       setLoading(false);
@@ -41,8 +43,10 @@ const CartPage = () => {
     try {
       await removeCartItem(cartItemId);
       await fetchCart();
+      showSuccess(toastMessages.removeFromCartSuccess);
     } catch {
       setError("Failed to remove item.");
+      showError("Failed to remove item.");
     } finally {
       setRemovingId(null);
     }
@@ -53,8 +57,10 @@ const CartPage = () => {
     try {
       await clearCart();
       setCart({ items: [], totalAmount: 0 });
+      showSuccess(toastMessages.cartCleared);
     } catch {
       setError("Failed to clear cart.");
+      showError("Failed to clear cart.");
     } finally {
       setClearing(false);
     }
@@ -68,9 +74,12 @@ const CartPage = () => {
       await placeOrder();
       setSuccess("Order placed successfully!");
       setCart({ items: [], totalAmount: 0 });
+      showSuccess(toastMessages.orderPlaced);
       setTimeout(() => navigate("/orders"), 1500);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to place order.");
+      const errorMsg = err.response?.data?.message || "Failed to place order.";
+      setError(errorMsg);
+      showError(errorMsg);
     } finally {
       setPlacing(false);
     }

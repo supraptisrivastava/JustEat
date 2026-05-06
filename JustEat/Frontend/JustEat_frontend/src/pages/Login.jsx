@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { showSuccess, showError, toastMessages } from "../utils/toast";
 
 const inputCls =
   "w-full px-3 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-orange-500 transition-colors";
@@ -24,10 +25,13 @@ const Login = () => {
     setLoading(true);
     try {
       await login(form);
+      showSuccess(toastMessages.loginSuccess);
       const next = searchParams.get("next");
       navigate(next ? `/${next}` : "/");
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid email or password.");
+      const errorMsg = err.response?.data?.message || toastMessages.loginError;
+      setError(errorMsg);
+      showError(errorMsg);
     } finally {
       setLoading(false);
     }

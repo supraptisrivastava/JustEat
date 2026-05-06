@@ -59,6 +59,11 @@ public class MenuItemController {
         return menuItemService.getMenu(restaurantId);
     }
 
+    @GetMapping("/popular")
+    public List<MenuItemResponse> getPopularItems(@PathVariable UUID restaurantId){
+        return menuItemService.getPopularItems(restaurantId);
+    }
+
     @PatchMapping("/{menuItemId}")
     @PreAuthorize("hasRole('OWNER')")
     public MenuItemResponse updateMenuItem(@PathVariable UUID restaurantId, @PathVariable Long menuItemId, @RequestBody @Valid UpdateMenuItemRequest request){

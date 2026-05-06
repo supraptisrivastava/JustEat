@@ -15,6 +15,7 @@ import com.example.JustEat.service.CloudinaryService;
 import com.example.JustEat.service.MenuItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -120,5 +121,33 @@ public class MenuItemServiceImpl implements MenuItemService {
                 .stream()
                 .map(r -> MenuItemMapper.toResponse(r))
                 .toList();
+    }
+
+    @Override
+    public List<MenuItemResponse> getPopularItems(UUID restaurantId) {
+        return menuItemRepository
+                .findByRestaurant_PublicIdAndIsAvailableTrueOrderByOrderCountDesc(restaurantId)
+                .stream()
+                .limit(5) // Top 5 popular items
+                .map(MenuItemMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<MenuItemResponse> getGlobalPopularItems() {
+        return menuItemRepository
+                .findTop10ByIsAvailableTrueOrderByOrderCountDesc()
+                .stream()
+                .map(MenuItemMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void incrementOrderCount(Long menuItemId, int quantity) {
+        MenuItem item = menuItemRepository.findById(menuItemId)
+                .orElseThrow(() -> new NotFoundException("Menu item not found"));
+        item.setOrderCount(item.getOrderCount() + quantity);
+        menuItemRepository.save(item);
     }
 }

@@ -5,6 +5,7 @@ import { getRestaurant } from "../api/restaurantApi";
 import { getMenu } from "../api/menuApi";
 import { addToCart } from "../api/cartApi";
 import { useAuth } from "../context/AuthContext";
+import { showSuccess, showError, toastMessages } from "../utils/toast";
 
 const dietCls = (d) => {
   const base = "text-xs font-bold px-2.5 py-0.5 rounded-full border";
@@ -50,9 +51,12 @@ const RestaurantDetail = () => {
     try {
       await addToCart(menuItemId, 1);
       setCartMessage("Added to cart!");
+      showSuccess(toastMessages.addToCartSuccess);
       setTimeout(() => setCartMessage(""), 2000);
     } catch (err) {
-      setCartMessage(err.response?.data?.message || "Failed to add to cart");
+      const errorMsg = err.response?.data?.message || "Failed to add to cart";
+      setCartMessage(errorMsg);
+      showError(errorMsg);
       setTimeout(() => setCartMessage(""), 3000);
     } finally {
       setAddingItemId(null);

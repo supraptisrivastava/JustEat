@@ -1,10 +1,12 @@
 package com.example.JustEat.controller;
 import org.springframework.http.ResponseEntity;
 import com.example.JustEat.dto.request.CreateRestaurantRequest;
+import com.example.JustEat.dto.response.MenuItemResponse;
 import com.example.JustEat.dto.response.RestaurantResponse;
 import com.example.JustEat.entity.Restaurant;
 import com.example.JustEat.enums.CuisineType;
 import com.example.JustEat.enums.Location;
+import com.example.JustEat.service.MenuItemService;
 import com.example.JustEat.service.RestaurantService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -24,6 +26,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RestaurantController {
     private final RestaurantService restaurantService;
+    private final MenuItemService menuItemService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('OWNER')")
@@ -71,6 +74,11 @@ public class RestaurantController {
     @PreAuthorize("hasRole('OWNER')")
     public List<RestaurantResponse> getMyRestaurants(){
         return restaurantService.getMyRestaurants();
+    }
+
+    @GetMapping("/popular-items")
+    public ResponseEntity<List<MenuItemResponse>> getPopularItems() {
+        return ResponseEntity.ok(menuItemService.getGlobalPopularItems());
     }
 }
 

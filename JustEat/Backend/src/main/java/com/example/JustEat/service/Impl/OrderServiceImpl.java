@@ -12,6 +12,7 @@ import com.example.JustEat.repository.CartRepository;
 import com.example.JustEat.repository.OrderRepository;
 import com.example.JustEat.repository.UserRepository;
 import com.example.JustEat.service.CartService;
+import com.example.JustEat.service.MenuItemService;
 import com.example.JustEat.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +30,7 @@ public class OrderServiceImpl implements OrderService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
     private final CartService cartService;
+    private final MenuItemService menuItemService;
 
     private User getCurrentUser() {
         String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -73,6 +75,11 @@ public class OrderServiceImpl implements OrderService {
 
         // Save order
         Order savedOrder = orderRepository.save(order);
+
+        // Increment order counts for menu items (for "Mostly Ordered" feature)
+        for (CartItem cartItem : cart.getItems()) {
+            menuItemService.incrementOrderCount(cartItem.getMenuItem().getId(), cartItem.getQuantity());
+        }
 
         // Clear cart
         cartService.clearCart();

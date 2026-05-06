@@ -15,4 +15,10 @@ public interface MenuItemRepository extends JpaRepository<MenuItem,Long> {
     List<MenuItem> findByRestaurant_Id(Long restaurantId);
     Optional<MenuItem> findById(Long id);
     List<MenuItem> findByRestaurant_PublicIdAndIsAvailableTrue(UUID publicId);
+    
+    // Mostly Ordered feature - get popular items by order count
+    List<MenuItem> findByRestaurant_PublicIdAndIsAvailableTrueOrderByOrderCountDesc(UUID publicId);
+    
+    // Get top N popular items across all restaurants
+    List<MenuItem> findTop10ByIsAvailableTrueOrderByOrderCountDesc();
 }
