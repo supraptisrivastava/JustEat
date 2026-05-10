@@ -12,6 +12,7 @@ import CartPage from "../pages/CartPage";
 import OrderHistoryPage from "../pages/OrderHistoryPage";
 import OrderDetailsPage from "../pages/OrderDetailsPage";
 import OwnerOrdersPage from "../pages/OwnerOrdersPage";
+import FavouritesPage from "../pages/FavouritesPage";
 import PrivateRoute from "../components/PrivateRoute";
 import { useAuth } from "../context/AuthContext";
 
@@ -100,6 +101,14 @@ const AppRoutes = () => (
         element={
           <PrivateRoute>
             <OrderDetailsPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/favourites"
+        element={
+          <PrivateRoute>
+            <FavouritesPage />
           </PrivateRoute>
         }
       />

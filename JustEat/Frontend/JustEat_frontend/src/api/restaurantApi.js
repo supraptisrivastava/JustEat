@@ -22,3 +22,6 @@ export const searchRestaurants = ({ keyword, cuisine, location }) => {
   return api.get("/restaurants/search", { params });
 };
 
+export const getRecommendations = () => api.get("/restaurants/recommendations");
+
+export const getGlobalPopularItems = () => api.get("/restaurants/popular-items");

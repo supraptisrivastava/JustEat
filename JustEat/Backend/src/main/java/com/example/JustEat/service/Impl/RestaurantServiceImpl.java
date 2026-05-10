@@ -13,6 +13,7 @@ import com.example.JustEat.repository.UserRepository;
 import com.example.JustEat.service.CloudinaryService;
 import com.example.JustEat.repository.UserPreferenceRepository;
 import com.example.JustEat.repository.OrderRepository;
+import com.example.JustEat.repository.FavouriteRepository;
 import com.example.JustEat.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +33,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     private final CloudinaryService cloudinaryService;
     private final UserPreferenceRepository userPreferenceRepository;
     private final OrderRepository orderRepository;
+    private final FavouriteRepository favouriteRepository;
     private User getCurrentUser() {
         String userIdStr = SecurityContextHolder
                 .getContext()
@@ -115,16 +117,24 @@ public class RestaurantServiceImpl implements RestaurantService {
                 .orElse(null);
 
         List<Restaurant> recommended = new ArrayList<>();
-        if (preference != null && preference.getFavouriteCuisines() != null) {
+
+        // Priority 1: Favourite restaurants
+        List<Restaurant> favRestaurants = favouriteRepository.findFavouriteRestaurantsByUser(user);
+        recommended.addAll(favRestaurants);
+
+        // Priority 2: Restaurants based on favourite cuisines
+        if (preference != null && preference.getFavouriteCuisines() != null && !preference.getFavouriteCuisines().isEmpty()) {
             recommended.addAll(
                     restaurantRepository.findByCuisineTypesIn(preference.getFavouriteCuisines())
             );
         }
-        List<Order> orders = orderRepository.findByUserOrderByCreatedAtDesc(user);
 
+        // Priority 3: Restaurants from order history
+        List<Order> orders = orderRepository.findByUserOrderByCreatedAtDesc(user);
         for (Order order : orders) {
             recommended.add(order.getRestaurant());
         }
+
         List<Restaurant> unique = recommended.stream().distinct().toList();
         return unique.stream()
                 .limit(10)

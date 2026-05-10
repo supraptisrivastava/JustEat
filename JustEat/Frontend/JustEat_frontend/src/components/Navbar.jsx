@@ -39,6 +39,12 @@ const Navbar = () => {
         {role === "CUSTOMER" && (
           <>
             <Link
+              to="/favourites"
+              className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 font-semibold text-sm transition-colors no-underline"
+            >
+              ❤️ Favourites
+            </Link>
+            <Link
               to="/cart"
               className="text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-400 font-semibold text-sm transition-colors no-underline"
             >

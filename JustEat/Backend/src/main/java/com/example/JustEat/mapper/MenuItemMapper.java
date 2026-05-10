@@ -22,6 +22,7 @@ public class MenuItemMapper {
                 .isSpecial(item.isSpecial())
                 .orderCount(item.getOrderCount())
                 .isMostlyOrdered(isMostlyOrdered)
+                .restaurantPublicId(item.getRestaurant() != null ? item.getRestaurant().getPublicId() : null)
                 .build();
     }
 }
