@@ -171,37 +171,64 @@ const RestaurantDetail = () => {
                 {menu.map((item) => (
                   <div
                     key={item.id}
-                    className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md flex flex-col gap-2 ${
+                    className={`bg-white dark:bg-gray-800 rounded-xl shadow-md flex flex-col overflow-hidden ${
                       !item.available ? "opacity-40" : ""
-                    }`}
+                    } ${item.special ? "ring-2 ring-yellow-400 dark:ring-yellow-500" : ""}`}
                   >
-                    <div className="font-bold text-base text-gray-900 dark:text-white">
-                      {item.name}
-                    </div>
-                    <div className="text-lg font-extrabold text-orange-500">
-                      ₹{item.price?.toFixed(2)}
-                    </div>
-                    <div className="flex justify-between items-center flex-wrap gap-2">
-                      <span className={dietCls(item.dietaryRestriction)}>
-                        {item.dietaryRestriction?.replace("_", " ") ||
-                          item.cuisineType}
-                      </span>
-                      {!item.available && (
-                        <span className="text-xs text-gray-400">
-                          Unavailable
+                    {/* Item image */}
+                    {item.imageUrl && (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="w-full h-36 object-cover"
+                      />
+                    )}
+                    <div className="p-4 flex flex-col gap-2 flex-1">
+                      {/* Chef's Special badge */}
+                      {item.special && (
+                        <span className="self-start text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border border-yellow-300 dark:border-yellow-600">
+                          ⭐ Chef&apos;s Special
                         </span>
                       )}
+                      {/* Mostly Ordered badge */}
+                      {item.mostlyOrdered && (
+                        <span className="self-start text-xs font-bold px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border border-orange-300 dark:border-orange-600">
+                          🔥 Mostly Ordered
+                        </span>
+                      )}
+                      <div className="font-bold text-base text-gray-900 dark:text-white">
+                        {item.name}
+                      </div>
+                      {item.description && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                          {item.description}
+                        </p>
+                      )}
+                      <div className="text-lg font-extrabold text-orange-500">
+                        ₹{item.price?.toFixed(2)}
+                      </div>
+                      <div className="flex justify-between items-center flex-wrap gap-2">
+                        <span className={dietCls(item.dietaryRestriction)}>
+                          {item.dietaryRestriction?.replace("_", " ") ||
+                            item.cuisineType}
+                        </span>
+                        {!item.available && (
+                          <span className="text-xs text-gray-400">
+                            Unavailable
+                          </span>
+                        )}
+                      </div>
+                      {/* Add to Cart Button - Only for Customers */}
+                      {role === "CUSTOMER" && item.available && (
+                        <button
+                          onClick={() => handleAddToCart(item.id)}
+                          disabled={addingItemId === item.id}
+                          className="mt-auto w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed border-none cursor-pointer"
+                        >
+                          {addingItemId === item.id ? "Adding..." : "Add to Cart"}
+                        </button>
+                      )}
                     </div>
-                    {/* Add to Cart Button - Only for Customers */}
-                    {role === "CUSTOMER" && item.available && (
-                      <button
-                        onClick={() => handleAddToCart(item.id)}
-                        disabled={addingItemId === item.id}
-                        className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed border-none cursor-pointer"
-                      >
-                        {addingItemId === item.id ? "Adding..." : "Add to Cart"}
-                      </button>
-                    )}
                   </div>
                 ))}
               </div>
