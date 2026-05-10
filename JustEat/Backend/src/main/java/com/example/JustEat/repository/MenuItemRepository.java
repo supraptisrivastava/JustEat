@@ -15,6 +15,7 @@ public interface MenuItemRepository extends JpaRepository<MenuItem,Long> {
     List<MenuItem> findByRestaurant_Id(Long restaurantId);
     Optional<MenuItem> findById(Long id);
     List<MenuItem> findByRestaurant_PublicIdAndIsAvailableTrue(UUID publicId);
+    List<MenuItem> findByRestaurant_PublicId(UUID publicId); // all items including unavailable (for owner)
     
     // Mostly Ordered feature - get popular items by order count
     List<MenuItem> findByRestaurant_PublicIdAndIsAvailableTrueOrderByOrderCountDesc(UUID publicId);

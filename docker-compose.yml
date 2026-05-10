@@ -27,6 +27,7 @@ services:
     build:
       context: ./JustEat/Backend
       dockerfile: Dockerfile
+    # Note: Dockerfile builds the JAR internally via Maven (multi-stage build)
     container_name: justeat-backend
     restart: unless-stopped
     depends_on:

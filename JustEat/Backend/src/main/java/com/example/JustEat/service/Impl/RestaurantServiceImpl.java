@@ -144,8 +144,9 @@ public class RestaurantServiceImpl implements RestaurantService {
             }
         }
 
+        String keywordParam = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
         List<Restaurant> restaurants = restaurantRepository
-                .searchRestaurants(keyword, cuisineEnum, location);
+                .searchRestaurants(keywordParam, cuisineEnum, location);
 
         return restaurants.stream()
                 .map(RestaurantMapper::toResponse)

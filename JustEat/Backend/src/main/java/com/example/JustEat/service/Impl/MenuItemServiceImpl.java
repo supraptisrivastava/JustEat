@@ -114,12 +114,23 @@ public class MenuItemServiceImpl implements MenuItemService {
 
     @Override
     public List<MenuItemResponse> getMenu(UUID restaurantId) {
-        Restaurant restaurant = restaurantRepository.findByPublicId(restaurantId)
+        restaurantRepository.findByPublicId(restaurantId)
                 .orElseThrow(() -> new NotFoundException("Restaurant not found"));
         return menuItemRepository
                 .findByRestaurant_PublicIdAndIsAvailableTrue(restaurantId)
                 .stream()
                 .map(r -> MenuItemMapper.toResponse(r))
+                .toList();
+    }
+
+    @Override
+    public List<MenuItemResponse> getFullMenu(UUID restaurantId) {
+        restaurantRepository.findByPublicId(restaurantId)
+                .orElseThrow(() -> new NotFoundException("Restaurant not found"));
+        return menuItemRepository
+                .findByRestaurant_PublicId(restaurantId)
+                .stream()
+                .map(MenuItemMapper::toResponse)
                 .toList();
     }
 

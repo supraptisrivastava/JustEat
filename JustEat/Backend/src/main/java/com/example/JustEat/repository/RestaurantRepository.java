@@ -20,8 +20,8 @@ public interface RestaurantRepository extends JpaRepository<Restaurant,Long> {
     List<Restaurant> findByCuisineTypesIn(List<CuisineType> cuisines);
     @Query("""
     SELECT r FROM Restaurant r
-    WHERE 
-        (:keyword IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    WHERE r.status = com.example.JustEat.enums.RestaurantStatus.OPEN
+        AND (:keyword IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', CAST(:keyword AS string), '%')))
         AND (:cuisine IS NULL OR :cuisine MEMBER OF r.cuisineTypes)
         AND (:location IS NULL OR r.location = :location)
 """)

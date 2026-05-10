@@ -1,7 +1,7 @@
 ﻿import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { getMenu, addMenuItem, updateMenuItem, deleteMenuItem } from "../api/menuApi";
+import { getMenu, getFullMenu, addMenuItem, updateMenuItem, deleteMenuItem } from "../api/menuApi";
 import { getRestaurant } from "../api/restaurantApi";
 
 const CUISINE_TYPES = ["INDIAN","CHINESE","JAPANESE","ITALIAN","MEXICAN","CONTINENTAL","FRENCH","FAST_FOOD"];
@@ -144,7 +144,7 @@ const ManageRestaurant = () => {
   const flash = (msg) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(""), 3000); };
 
   useEffect(() => {
-    Promise.all([getRestaurant(publicId), getMenu(publicId)])
+    Promise.all([getRestaurant(publicId), getFullMenu(publicId)])
       .then(([rRes, mRes]) => { setRestaurant(rRes.data); setMenuItems(mRes.data); })
       .catch(() => setPageError("Failed to load restaurant data."))
       .finally(() => setLoadingPage(false));

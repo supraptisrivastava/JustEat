@@ -59,6 +59,12 @@ public class MenuItemController {
         return menuItemService.getMenu(restaurantId);
     }
 
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('OWNER')")
+    public List<MenuItemResponse> getFullMenu(@PathVariable UUID restaurantId){
+        return menuItemService.getFullMenu(restaurantId);
+    }
+
     @GetMapping("/popular")
     public List<MenuItemResponse> getPopularItems(@PathVariable UUID restaurantId){
         return menuItemService.getPopularItems(restaurantId);

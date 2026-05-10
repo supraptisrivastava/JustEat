@@ -13,6 +13,7 @@ public interface MenuItemService {
     MenuItemResponse updateMenuItem(UUID restaurantId,Long menuItemId,  UpdateMenuItemRequest request, UUID userId);
     void deleteMenuItem(UUID restaurantId, Long menuItemId, UUID userId);
     List<MenuItemResponse> getMenu(UUID restaurantId);
+    List<MenuItemResponse> getFullMenu(UUID restaurantId); // owner only - includes unavailable items
     List<MenuItemResponse> getPopularItems(UUID restaurantId);
     List<MenuItemResponse> getGlobalPopularItems();
     void incrementOrderCount(Long menuItemId, int quantity);

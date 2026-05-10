@@ -29,7 +29,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             "image/gif"
     );
 
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 5MB
 
     @Override
     public Map<String, String> uploadImage(MultipartFile file, String folder) {

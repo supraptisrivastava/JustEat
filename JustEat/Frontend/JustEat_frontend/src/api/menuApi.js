@@ -3,6 +3,9 @@ import api from "./axiosConfig";
 export const getMenu = (restaurantId) =>
   api.get(`/restaurants/${restaurantId}/menu`);
 
+export const getFullMenu = (restaurantId) =>
+  api.get(`/restaurants/${restaurantId}/menu/all`); // owner: includes unavailable items
+
 export const addMenuItem = (restaurantId, formData) =>
   api.post(`/restaurants/${restaurantId}/menu`, formData, {
     headers: {

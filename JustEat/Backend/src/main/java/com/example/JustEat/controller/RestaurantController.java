@@ -48,18 +48,11 @@ public class RestaurantController {
     }
 
     @GetMapping
-    public List<RestaurantResponse> getRestaurants(@RequestParam(required = false)Location location){
+    public List<RestaurantResponse> getRestaurants(@RequestParam(required = false) Location location){
         return restaurantService.getAllRestaurants(location);
     }
 
-    @GetMapping("/{publicId}")
-    public RestaurantResponse getRestaurants(@PathVariable UUID publicId){
-        return restaurantService.getRestaurant(publicId);
-    }
-    @GetMapping("/recommendations")
-    public ResponseEntity<List<RestaurantResponse>> getRecommendations() {
-        return ResponseEntity.ok(restaurantService.getRecommendations());
-    }
+    // NOTE: all fixed-path mappings MUST come before /{publicId} to avoid routing conflicts
     @GetMapping("/search")
     public ResponseEntity<List<RestaurantResponse>> search(
             @RequestParam(required = false) String keyword,
@@ -70,6 +63,12 @@ public class RestaurantController {
                 restaurantService.searchRestaurants(keyword, cuisine, location)
         );
     }
+
+    @GetMapping("/recommendations")
+    public ResponseEntity<List<RestaurantResponse>> getRecommendations() {
+        return ResponseEntity.ok(restaurantService.getRecommendations());
+    }
+
     @GetMapping("/my")
     @PreAuthorize("hasRole('OWNER')")
     public List<RestaurantResponse> getMyRestaurants(){
@@ -79,6 +78,11 @@ public class RestaurantController {
     @GetMapping("/popular-items")
     public ResponseEntity<List<MenuItemResponse>> getPopularItems() {
         return ResponseEntity.ok(menuItemService.getGlobalPopularItems());
+    }
+
+    @GetMapping("/{publicId}")
+    public RestaurantResponse getRestaurant(@PathVariable UUID publicId){
+        return restaurantService.getRestaurant(publicId);
     }
 }
 
